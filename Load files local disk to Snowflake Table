@@ -1,0 +1,49 @@
+
+--use database DEMO_DB;
+
+Create or Replace File Format mycsvformat
+    TYPE = 'CSV'
+    FIELD_DELIMITER = ','
+    FIELD_OPTIONALLY_ENCLOSED_BY='"' -- when double quotes are available in any column in csv format then we will handle error by this help of delimeter
+    SKIP_HEADER = 1;
+
+Create or replace Stage ass2_csv_stage
+    FILE_FORMAT = mycsvformat;
+
+--drop stage ass2_csv_stage    
+
+list @ass2_csv_stage;
+
+--put csv file in stage
+--Select t.$1,t.$2,t.$3 from @ass2_csv_stage/Orders.csv.gz t; --by the the help of stage.
+
+Select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16 from @ass2_csv_stage/Orders.csv.gz t
+--------------------------------------------------
+
+--Copy of data from stage into table
+
+Create or replace table ass2_table(
+OrderId integer,
+productId integer,
+productname varchar(50),
+customerid integer,
+orderdate date,
+customername varchar(50),
+customeraddress varchar(50),
+quantity integer,
+price integer,
+salesamount integer,
+shippingaddress varchar(50),
+billingaddress varchar(50),
+inventory integer,
+orderstatus varchar(50),
+producttype varchar(50),
+productcategory varchar(50)
+);
+
+--FILE_FORMAT = ( TYPE = 'csv' FIELD_DELIMITER= ',' );
+
+copy into ass2_table from @ass2_csv_stage;
+--ON_ERROR = 'CONTINUE';  --continue used for some error skip like number data type but by default it is numeric
+
+--Select * from ass2_table;
