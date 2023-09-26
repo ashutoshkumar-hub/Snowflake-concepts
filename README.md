@@ -1,8 +1,8 @@
 # Snowflake-concepts
 
-This Repo contians basics concepts for Snowflake
+This Repositories contians basics concepts for Snowflake
 
-Make trial account: https://signup.snowflake.com/
+Create trial account by this link : https://signup.snowflake.com/
 
 Download snowsql by using this link : https://developers.snowflake.com/snowsql/
 
