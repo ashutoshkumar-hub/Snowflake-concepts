@@ -1,0 +1,71 @@
+-- Create AWS Trial Account
+-- Create S3 bucket
+-- Create a folder and upload one file into it
+-- Generate a AWS Access Key (you can create access of either root user or iam user )
+-- In case of IAM user you have to give access of S3 bucket to that user
+
+//Create storage integration object
+
+CREATE OR REPLACE STORAGE INTEGRATION S3_INTEGRATION
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = S3
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::907232671044:role/snowpipes3'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://snowflakeawssnowpipes3/csv_files/');
+
+//Get external_id and update it in s3
+DESC INTEGRATION S3_INTEGRATION;
+
+
+CREATE OR REPLACE FILE FORMAT csv_snowpipe 
+type='csv',
+skip_header = 1, 
+FIELD_DELIMITER = ',',
+FIELD_OPTIONALLY_ENCLOSED_BY = '"';
+
+
+//Create Stage
+CREATE OR REPLACE STAGE SNOWPIPE_STAGE 
+URL=('s3://snowflakeawssnowpipes3/csv_files/')
+STORAGE_INTEGRATION=S3_INTEGRATION;
+
+
+//creating pipe and copy data into table
+CREATE OR REPLACE PIPE S3_PIPE
+auto_ingest = TRUE as
+copy into S3_table
+from @SNOWPIPE_STAGE
+file_format = csv_snowpipe;
+
+
+--show pipes;
+ALTER PIPE S3_PIPE REFRESH;
+
+LIST @SNOWPIPE_STAGE;
+
+
+--TRUNCATE S3_table;
+SELECT SYSTEM$PIPE_STATUS('S3_pipe'); -- It used to see the status of snowpipe.
+
+
+/* SELECT * FROM S3_table;
+
+Create or replace table S3_table(
+OrderId integer,
+productId integer,
+productname varchar(50),
+customerid integer,
+orderdate date,
+customername varchar(50),
+customeraddress varchar(50),
+quantity integer,
+price integer,
+salesamount integer,
+shippingaddress varchar(50),
+billingaddress varchar(50),
+inventory integer,
+orderstatus varchar(50),
+producttype varchar(50),
+productcategory varchar(50)
+);
+*/
