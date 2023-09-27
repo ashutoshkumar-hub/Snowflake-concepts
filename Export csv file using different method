@@ -1,0 +1,46 @@
+--Export Snowflake table from Snowflake Sample DB data to csv file in local disk using GET command 
+
+--Export Snowflake table from Snowflake Sample DB data to multiple csv files based on file size(10MB) in local disk using GET command 
+
+--Export Snowflake table from Snowflake Sample DB data to AWS S3 to multiple files 
+
+
+----------------Part 1---------------------------------
+
+copy into @stage_csv_file from (Select * from ORDERS) file_format = (type='csv',compression=None
+                                        skip_header = 1,
+                                        FIELD_DELIMITER = ',',
+                                        FIELD_OPTIONALLY_ENCLOSED_BY = '"');
+
+get @stage_csv_file file:///Users//ashutosh.kumar.ACS/Downloads/;
+
+
+-------------------Part 2---------------------------------
+
+Create or Replace File Format Ass_part_2_format
+    TYPE = 'CSV'
+    FIELD_DELIMITER = ','
+    COMPRESSION = None
+    FIELD_OPTIONALLY_ENCLOSED_BY='"'
+    SKIP_HEADER = 1;
+
+create or replace stage my_ass2_stage
+FILE_FORMAT = Ass_part_2_format;
+
+
+copy into @my_ass2_stage
+from SNOWFLAKE_SAMPLE_DATA.TPCDS_SF100TCL.CUSTOMER_DEMOGRAPHICS
+MAX_FILE_SIZE = 10485760;
+ 
+
+list @my_ass2_stage;
+
+
+-----------------Part 3----------------------------------
+
+  CREATE OR REPLACE STORAGE INTEGRATION S3_INTEGRATION
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = S3
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::907232671033:role/snowpipes3'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://snowflakeawssnowpipes3/csv_files/');
