@@ -1,16 +1,17 @@
---Export Snowflake table from Snowflake Sample DB data to csv file in local disk using GET command 
+--Export Snowflake table from Snowflake Sample DB data to csv file in local disk using GET command. 
 
---Export Snowflake table from Snowflake Sample DB data to multiple csv files based on file size(10MB) in local disk using GET command 
+--Export Snowflake table from Snowflake Sample DB data to multiple csv files based on file size(10MB) in local disk using GET command. 
 
---Export Snowflake table from Snowflake Sample DB data to AWS S3 to multiple files 
+--Export Snowflake table from Snowflake Sample DB data to AWS S3 to multiple files. 
 
 
 ----------------Part 1---------------------------------
 
-copy into @stage_csv_file from (Select * from ORDERS) file_format = (type='csv',compression=None
-                                        skip_header = 1,
-                                        FIELD_DELIMITER = ',',
-                                        FIELD_OPTIONALLY_ENCLOSED_BY = '"');
+copy into @stage_csv_file from (Select * from ORDERS) 
+                              file_format = (type='csv',compression=None
+                              skip_header = 1,
+                              FIELD_DELIMITER = ',',
+                              FIELD_OPTIONALLY_ENCLOSED_BY = '"');
 
 get @stage_csv_file file:///Users//ashutosh.kumar.ACS/Downloads/;
 
