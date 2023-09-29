@@ -1,0 +1,53 @@
+--Implement continous loading which captures insert, updates and deletes of the source table to target table with time interval of 5 mins. 
+--Source: Orders
+--Target: Fact_orders
+
+--select * from S3_Table;
+
+create or replace stream S3_stream on table S3_Table;
+
+SELECT * FROM Fact_Table;
+select * from S3_stream;
+
+CREATE OR REPLACE TASK Task_Ass6
+WAREHOUSE = Demo_Warehouse  
+SCHEDULE = '5 MINUTE'
+AS
+
+MERGE INTO Fact_Table f USING S3_stream S ON f.orderid = s.orderID
+WHEN MATCHED AND metadata$action = 'DELETE' AND metadata$isupdate = 'FALSE' 
+THEN DELETE
+WHEN MATCHED AND metadata$action = 'INSERT' AND metadata$isupdate = 'TRUE' 
+THEN UPDATE SET f.PRODUCTNAME = s.PRODUCTNAME
+WHEN NOT MATCHED AND metadata$action = 'INSERT' AND metadata$isupdate = 'FALSE'
+THEN INSERT (ORDERID ,
+PRODUCTID ,
+PRODUCTNAME ,
+CUSTOMERID ,
+ORDERDATE,
+CUSTOMERNAME ,
+CUSTOMERADDRESS ,
+QUANTITY ,
+PRICE ,
+SALESAMOUNT ,
+SHIPPINGADDRESS ,
+BILLINGADDRESS ,
+INVENTORY ,
+ORDERSTATUS ,
+PRODUCTTYPE ,
+PRODUCTCATEGORY ) 
+VALUES (s.ORDERID ,
+s.PRODUCTID ,
+s.PRODUCTNAME ,
+s.CUSTOMERID ,
+s.ORDERDATE,s.CUSTOMERNAME ,s.CUSTOMERADDRESS ,s.QUANTITY ,s.PRICE ,s.SALESAMOUNT ,s.SHIPPINGADDRESS ,s.BILLINGADDRESS ,s.INVENTORY ,s.ORDERSTATUS ,s.PRODUCTTYPE ,s.PRODUCTCATEGORY );
+
+
+show TASKS;
+Show streams;
+
+UPDATE S3_Table set productname = 'Mobile' where orderid = 1;
+
+SELECT * FROM Fact_Table;
+
+ALTER TASK Task_Ass6 Resume;
