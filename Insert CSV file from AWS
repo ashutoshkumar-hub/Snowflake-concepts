@@ -1,0 +1,53 @@
+--Insert a CSV file from AWS with continuous loading: 
+
+--1) Whenever a new file is added to AWS S3 path, should be loaded to Snowflake
+--2) Schedule this process to load files daily
+--3) Enable an option to manually run the process to load files to Snowflake
+
+
+CREATE OR REPLACE STORAGE INTEGRATION S3_INTEGRATION
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = S3
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::907232671033:role/snowpipes3'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://snowflakeawssnowpipes3/csv_files/');
+
+  
+  DESC INTEGRATION S3_INTEGRATION;
+
+
+CREATE OR REPLACE FILE FORMAT csv_snowpipe 
+type='csv',
+skip_header = 1, 
+FIELD_DELIMITER = ',',
+FIELD_OPTIONALLY_ENCLOSED_BY = '"';
+
+
+CREATE OR REPLACE STAGE SNOWPIPE_STAGE_ASS7 
+URL=('s3://snowflakeawssnowpipes3/csv_files/')
+STORAGE_INTEGRATION=S3_INTEGRATION;
+
+
+CREATE OR REPLACE PIPE S3_PIPE
+auto_ingest = TRUE as
+copy into S3_table
+from @SNOWPIPE_STAGE_ASS7
+file_format = csv_snowpipe;
+
+
+ALTER PIPE S3_PIPE REFRESH;
+
+LIST @SNOWPIPE_STAGE_ASS7;
+
+SELECT SYSTEM$PIPE_STATUS('S3_pipe');
+
+---------------------------------------------------------
+
+
+CREATE OR REPLACE TASK my_crontask
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = 'USING CRON 40 3 * * * UTC'
+    AS
+    ALTER PIPE S3_PIPE REFRESH; 
+
+select * from s3_table;
