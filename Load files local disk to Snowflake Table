@@ -1,3 +1,5 @@
+--Implement a process to load files from local disk to Snowflake table.
+--File: attached orders.csv"
 
 --use database DEMO_DB;
 
