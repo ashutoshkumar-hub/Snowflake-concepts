@@ -1,0 +1,71 @@
+/*Create role hierarchy to provide access mentioned below
+Custom Roles:
+ANALYST: Should have access of
+Usage on warehouse warehouse_name
+Read only on DEMO_DB.STAGING
+DEVELOPER: Should have all the access of ANALYST 
+And read only on FIVETRAN_DATABASE.CSV_UPLOADS
+CI: Should have all the access of ANALYST and DEVELOPER 
+And insert/update on DEMO DB */
+
+
+/*create or replace user ashutosh
+    password = 'Test@12$4'
+    default_role = 'SYSADMIN'
+    must_change_password = FALSE;
+
+Grant role "SYSADMIN" To user ashutosh;
+Grant role "ACCOUNTADMIN" to user ashutosh;
+Grant role "SECURITYADMIN" To user ashutosh;
+Grant role "USERADMIN" To user ashutosh;
+*/
+
+
+Use Role ACCOUNTADMIN; 
+
+Create or replace warehouse demo_warehouse; 
+Create or replace role Analyst_role;
+Grant role Analyst_role to user ashutosh;
+
+
+Create database demo_db;
+Create Schema Staging;
+ 
+
+Use database demo_db;
+Create or replace table details(a1 varchar());
+Select * from details;
+
+
+Grant Usage on warehouse demo_warehouse to role Analyst_role;
+Grant Usage on database demo_db to role Analyst_role;
+Grant Usage on schema demo_db.staging to role Analyst_role;
+Grant Select on all tables in schema Demo_DB.Staging to role Analyst_role;
+Show Grants to role Analyst_role;
+
+---------------------------------------------------------
+
+Create or replace role developer_role;
+Grant role developer_role to user ashutosh; 
+
+
+Grant role Analyst_role to Role Developer_role;
+Create or replace database fivetran_db;
+Create schema csv_upload;
+Create OR replace table csv_file(a2 varchar());
+
+
+Grant Usage on database fivetran_db to role developer_role;
+Grant Usage on schema fivetran_db.csv_upload to role Developer_role;
+Show Grants to role developer_role;
+
+---------------------------------------------------------
+
+Create or replace  role CI;
+Grant role CI to User ashutosh;
+
+
+Grant role developer_role to role CI;
+Grant insert on all tables in database demo_db to role CI;
+Grant update on all tables in database demo_db to role CI;
+Show Grants to role CI;
