@@ -4,6 +4,10 @@
 -- Generate a AWS Access Key (you can create access of either root user or iam user )
 -- In case of IAM user you have to give access of S3 bucket to that user
 
+
+--Implement a process to fetch files from AWS S3 and load to Snowflake table.
+--File: attached orders.csv"
+
 //Create storage integration object
 
 CREATE OR REPLACE STORAGE INTEGRATION S3_INTEGRATION
